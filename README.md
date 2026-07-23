@@ -1,6 +1,1 @@
---//====================================================\\--
---||			   CREATED BY SHACKLUSTER
---||               EDIT BY NAME CLAN
---||               TRANSFORM TO BANISHER GUN V.4
---||                             BY nguyenducloi123
---\\====================================================//--
+
