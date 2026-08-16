@@ -1,67 +1,59 @@
 local Players = game:GetService("Players")
-local Lighting = game:GetService("Lighting")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local remoteEvent = ReplicatedStorage:FindFirstChild("ESPControlEvent")
-if not remoteEvent then
-	error("ESPControlEvent не найден в ReplicatedStorage!")
-end
+-- Создаём интерфейс
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "DemoGUI"
+screenGui.ResetOnSpawn = false
 
-local ESP_COLOR = Color3.fromRGB(0, 255, 0)
-local ESP_OUTLINE_COLOR = Color3.fromRGB(255, 255, 255)
-local DEFAULT_FOG_END = 1000
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 150)
+frame.Position = UDim2.new(0.5, -100, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+frame.BorderSizePixel = 0
 
-local espEnabled = false
-local fogEnabled = true
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.Text = "Демо GUI"
+title.TextColor3 = Color3.white
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
 
-local function setESP(enabled)
-	espEnabled = enabled
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= Players.LocalPlayer and player.Character then
-			local character = player.Character
-			local highlight = character:FindFirstChild("ESPHighlight")
-			
-			if enabled then
-				if not highlight then
-					highlight = Instance.new("Highlight")
-					highlight.Name = "ESPHighlight"
-					highlight.FillColor = ESP_COLOR
-					highlight.OutlineColor = ESP_OUTLINE_COLOR
-					highlight.Parent = character
-				end
-			else
-				if highlight then
-					highlight:Destroy()
-				end
-			end
-		end
-	end
-end
+local btnFogOn = Instance.new("TextButton")
+btnFogOn.Size = UDim2.new(1, -20, 0, 40)
+btnFogOn.Position = UDim2.new(0, 10, 0, 40)
+btnFogOn.Text = "Включить туман"
+btnFogOn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+btnFogOn.TextColor3 = Color3.white
 
-local function setFog(enabled)
-	fogEnabled = enabled
-	local atmosphere = Lighting:FindFirstChild("Atmosphere")
-	if not atmosphere then
-		atmosphere = Instance.new("Atmosphere", Lighting)
-	end
-	
-	if enabled then
-		atmosphere.Enabled = true
-		atmosphere.End = DEFAULT_FOG_END
-	else
-		atmosphere.Enabled = false
-	end
-end
+local btnFogOff = Instance.new("TextButton")
+btnFogOff.Size = UDim2.new(1, -20, 0, 40)
+btnFogOff.Position = UDim2.new(0, 10, 0, 90)
+btnFogOff.Text = "Убрать туман"
+btnFogOff.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+btnFogOff.TextColor3 = Color3.white
 
-remoteEvent.OnServerEvent:Connect(function(player, action, value)
-	-- Здесь можно добавить проверку прав (например, по UserId)
-	if action == "toggle_esp" then
-		setESP(value)
-	elseif action == "toggle_fog" then
-		setFog(value)
-	end
+-- Собираем элементы
+title.Parent = frame
+btnFogOn.Parent = frame
+btnFogOff.Parent = frame
+frame.Parent = screenGui
+screenGui.Parent = playerGui
+
+-- Управление туманом (легально, через Lighting)
+local lighting = game:GetService("Lighting")
+
+btnFogOn.MouseButton1Click:Connect(function()
+	lighting.FogStart = 0
+	lighting.FogEnd = 1000
+	lighting.FogColor = Color3.new(0.8, 0.8, 0.9)
 end)
 
--- Инициализация
-setESP(false)
-setFog(true)
+btnFogOff.MouseButton1Click:Connect(function()
+	lighting.FogStart = 0
+	lighting.FogEnd = 99999
+	lighting.FogColor = lighting.OutdoorAmbient -- возвращаем естественный цвет
+end)
